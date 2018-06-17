@@ -3,13 +3,13 @@ open TypeConstraints
 
 type typeEnv = (variable * tipo) list
 
-exception UndefinedIdentifier
+exception UndefinedIdentifier of variable
 
 (* Retorna o valor associado a uma chave em uma lista de pares (chave, valor) *)
 let lookup = List.assoc
 
 let collectTyEqs env expr =
-  let varCount = ref 0 in
+  let varCount = ref (-1) in
   
   let newTypeVar () =
     incr varCount;
@@ -59,7 +59,7 @@ let collectTyEqs env expr =
     | Var x ->
         (try let t = lookup x env in
              (t, [])
-         with Not_found -> raise UndefinedIdentifier)
+         with Not_found -> raise (UndefinedIdentifier x))
     
     (* C-App *)
     | App (e1, e2) ->
@@ -83,20 +83,20 @@ let collectTyEqs env expr =
     | Let (x, t, e1, e2) ->
         let (t1, c1) = collect env e1 in
         let (t2, c2) = collect ((x, t)::env) e2 in
-        (t2, c1 @ c2 @ [(t, t1)])
+        (t2, c1 @ c2 @ [(t1, t)])
     
     (* C-LetImpl *)
     | LetImpl (id_x, e1, e2) ->
         let (t1, c1) = collect env e1 in
         let type_x = newTypeVar () in
         let (t2, c2) = collect ((id_x, type_x)::env) e2 in
-        (t2, c1 @ c2 @ [(type_x, t1)])
+        (t2, c1 @ c2 @ [(t1, type_x)])
     
     (* C-LetR *)
     | Lrec (f, t', t, y, t'', e1, e2) ->
         let (t1, c1) = collect ((f, TyFn (t', t))::(y, t')::env) e1 in
         let (t2, c2) = collect ((f, TyFn (t', t))::env) e2 in
-        (t2, c1 @ c2 @ [(t, t1); (t', t'')])
+        (t2, c1 @ c2 @ [(t1, t); (t', t'')])
     
     (* C-LetRImpl *)
     | LrecImpl (f, id_y, e1, e2) ->
@@ -104,7 +104,7 @@ let collectTyEqs env expr =
         let type_y = newTypeVar () in
         let (t1, c1) = collect ((f, type_x)::(id_y, type_y)::env) e1 in
         let (t2, c2) = collect ((f, type_x)::env) e2 in
-        (t2, c1 @ c2 @ [(type_x, TyFn (type_y, t1))])
+        (t2, c1 @ c2 @ [(TyFn (type_y, t1), type_x)])
     
     (* C-Nil *)
     | Nil ->

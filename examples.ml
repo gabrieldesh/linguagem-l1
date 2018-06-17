@@ -6,14 +6,14 @@ let rec fat : int -> int = (fn n : int =>
   then 1
   else n * fat (n - 1)
 ) in
-fat 3
+fat
 *)
 let progFat =
   Lrec ("fat", TyInt, TyInt, "n", TyInt, 
         If (Bop (Eq, Var "n", Num 0),
             Num 1,
             Bop (Mult, Var "n", App (Var "fat", Bop (Diff, Var "n", Num 1)))),
-        App (Var "fat", Num 3))
+        Var "fat")
 
 (* Mesmo programa, mas com tipagem implícita. *)
 let progFatImpl =
@@ -21,7 +21,7 @@ let progFatImpl =
             If (Bop (Eq, Var "n", Num 0),
                 Num 1,
                 Bop (Mult, Var "n", App (Var "fat", Bop (Diff, Var "n", Num 1)))),
-            App (Var "fat", Num 3))
+            Var "fat")
 
 (*
 let rec map : (int -> int) -> int list -> int list = (fn f : (int -> int) =>

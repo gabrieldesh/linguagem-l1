@@ -1,5 +1,6 @@
 open Syntax
 open TypeConstraints
+open Substituition
 
 exception OccursCheckError of variable * tipo
 exception UnificationError of typeConstraint
@@ -12,14 +13,7 @@ let unify eqs =
     | TyList t            -> occurs x t
   in
   
-  let rec replaceInType x t t1 = match t1 with
-    | TyVar y when y == x -> t
-    | TyVar y             -> TyVar y
-    | TyInt               -> TyInt
-    | TyBool              -> TyBool
-    | TyFn (t1, t2)       -> TyFn (replaceInType x t t1,
-                                   replaceInType x t t2)
-    | TyList t1           -> TyList (replaceInType x t t1)
+  let rec replaceInType x tSub t = applySubstMapping (x, tSub) t
   in
   
   let rec replace x t constraints = match constraints with

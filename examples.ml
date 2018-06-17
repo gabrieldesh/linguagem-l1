@@ -8,20 +8,24 @@ let rec fat : int -> int = (fn n : int =>
 ) in
 fat
 *)
-let progFat =
+let fat =
   Lrec ("fat", TyInt, TyInt, "n", TyInt, 
         If (Bop (Eq, Var "n", Num 0),
             Num 1,
             Bop (Mult, Var "n", App (Var "fat", Bop (Diff, Var "n", Num 1)))),
         Var "fat")
 
+let progFat = App (fat, Num 3)
+
 (* Mesmo programa, mas com tipagem implícita. *)
-let progFatImpl =
+let fatImpl =
   LrecImpl ("fat", "n",
             If (Bop (Eq, Var "n", Num 0),
                 Num 1,
                 Bop (Mult, Var "n", App (Var "fat", Bop (Diff, Var "n", Num 1)))),
             Var "fat")
+
+let progFatImpl = App (fatImpl, Num 3)
 
 (*
 let rec map : (int -> int) -> int list -> int list = (fn f : (int -> int) =>
@@ -43,7 +47,7 @@ let progMap =
                  Nil)),
         Let ("inc", TyFn (TyInt, TyInt),
              Lam ("n", TyInt, Bop (Sum, Var "n", Num 1)),
-             App (App (Var "map", Var "inc"), Cons(Num 0, Cons(Num 1, Nil)))))
+             App (App (Var "map", Var "inc"), Cons (Num 0, Cons (Num 1, Nil)))))
 
 (* Mesmo programa, mas com tipagem implícita. *)
  let progMapImpl =
@@ -54,7 +58,7 @@ let progMap =
                           Nil)),
              LetImpl ("inc",
                       LamImpl ("n", Bop (Sum, Var "n", Num 1)),
-                      App (App (Var "map", Var "inc"), Cons(Num 0, Cons(Num 1, Nil)))))
+                      App (App (Var "map", Var "inc"), Cons (Num 0, Cons (Num 1, Nil)))))
 
 (*
 let f = (fn l =>
@@ -85,3 +89,25 @@ fn f => (fn x => f (x x)) (fn x => f (x x))
 let progYCombinator =
   LamImpl("f", App (LamImpl ("x", App (Var "f", App (Var "x", Var "x"))),
                     LamImpl ("x", App (Var "f", App (Var "x", Var "x")))))
+
+(* O erro está no Cons de um Int com uma lista de Bool, na última linha. *)
+let progUnificationError =
+  LrecImpl ("map", "f",
+            LamImpl ("l",
+                     If (Not (IsEmpty (Var "l")),
+                         Cons (App (Var "f", Hd (Var "l")), Tl (Var "l")),
+                         Nil)),
+            LetImpl ("inc",
+                     LamImpl ("n", Bop (Sum, Var "n", Num 1)),
+                     App (App (Var "map", Var "inc"), Cons (Num 0, Cons (Bool false, Nil)))))
+
+(* O erro está na última linha, no Var "mpa" que não foi declarado. *)
+let progUndefinedIdentifier =
+  LrecImpl ("map", "f",
+            LamImpl ("l",
+                     If (Not (IsEmpty (Var "l")),
+                         Cons (App (Var "f", Hd (Var "l")), Tl (Var "l")),
+                         Nil)),
+            LetImpl ("inc",
+                     LamImpl ("n", Bop (Sum, Var "n", Num 1)),
+                     App (App (Var "mpa", Var "inc"), Cons (Num 0, Cons (Num 1, Nil)))))

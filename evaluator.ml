@@ -120,14 +120,16 @@ let rec eval (env:env) (exp : expr) : value =	match exp with
 				
 	(* If *)
 	| If(e1,e2,e3) when eval(env e1) == Raise -> Raise
-	| If(e1,e2,e3) when eval(env e1) == true ->(match eval(env e2) with
-											Raise -> Raise
-											| _ -> eval(env e2)
-											)
-	| If(e1,e2,e3) when eval(env e1) == false ->(match eval(env e3) with
-											 Raise -> Raise
-											 | _ -> eval(env e3)
-											 )
+	| If(e1,e2,e3) when eval(env e1) == true ->
+		(match eval(env e2) with
+			Raise -> Raise
+			| _ -> eval(env e2)
+		)
+	| If(e1,e2,e3) when eval(env e1) == false ->
+		(match eval(env e3) with
+			Raise -> Raise
+			| _ -> eval(env e3)
+		)
 											 
 	(* Variável *)
 	| Var(variable) -> lookup_environment variable environment
@@ -144,7 +146,7 @@ let rec eval (env:env) (exp : expr) : value =	match exp with
 					then Raise 
 					else eval(update_env var v env) e
 				
-		|	Vrclos(f,x,e,enf), v -> 
+			| Vrclos(f,x,e,enf), v -> 
 				if(eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e == Raise)
 					then Raise
 					else eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e

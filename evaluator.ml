@@ -139,13 +139,16 @@ let rec eval (env:env) (exp : expr) : value =	match exp with
 		let v1 = eval env e1 in
 		let v2 = eval env e2 in
 		(match v1,v2 with
-			Vclos(var,e,env), v -> if(eval(update_env var v env) e == Raise) 
-										then Raise 
-										else eval(update_env var v env) e
-									)
-		|	Vrclos(f,x,e,enf), v -> if(eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e == Raise)
-										then Raise
-										else eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e
+			Vclos(var,e,env), v -> 
+				if(eval(update_env var v env) e == Raise) 
+					then Raise 
+					else eval(update_env var v env) e
+				
+		|	Vrclos(f,x,e,enf), v -> 
+				if(eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e == Raise)
+					then Raise
+					else eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e
+		)
 	
 	(* Função - Lam *)
 	

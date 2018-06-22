@@ -21,11 +21,11 @@ type expr = Num of int
           | Var of variable 
           | App of expr * expr 
           | Lam of variable * tipo * expr
-          | LamImpl of variable * expr
+          | LamImpl of variable * expr 
           | Let of variable * tipo * expr * expr
           | LetImpl of variable * expr * expr
           | Lrec of variable * tipo * tipo * variable * tipo * expr * expr
-          | LrecImpl of variable * variable * expr * expr
+          | LrecImpl of variable * variable * expr * expr 
           | Nil
           | Cons of expr * expr
           | IsEmpty of expr
@@ -139,6 +139,35 @@ let rec eval (env:env) (exp : expr) : value =	match exp with
 		let v1 = eval env e1 in
 		let v2 = eval env e2 in
 		(match v1,v2 with
-			Vclos(var,e,env), v -> eval (update_env var v env) e
-		|	Vrclos(f,x,e,enf), v -> eval (update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e
+			Vclos(var,e,env), v -> if(eval(update_env var v env) e == Raise) 
+										then Raise 
+										else eval(update_env var v env) e
+									)
+		|	Vrclos(f,x,e,enf), v -> if(eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e == Raise)
+										then Raise
+										else eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e
+	
 	(* Função - Lam *)
+	
+	(* Let *)
+	
+	(* LRec *)
+	
+	(* Nil *)
+	(* Cons *)
+	(* IsEmpty *)
+	(* Hd *)
+	(* Tl *)
+	(* Try *)
+	(* Raise - talvez lançar alguma exceção efetiva, algo do tipo
+	| Raise -> raise Exception
+	*)
+	(*
+		  | Nil
+          | Cons of expr * expr
+          | IsEmpty of expr
+          | Hd of expr
+          | Tl of expr
+          | Raise
+          | Try of expr * expr
+	*)

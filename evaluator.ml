@@ -34,18 +34,15 @@ type expr = Num of int
           | Raise
           | Try of expr * expr
 
-type value = Vnum of int 
+type result = Vnum of int 
            | Vbool of bool 
            | Vnil
-           | Vcons of value * value 
+           | Vcons of result * result 
            | Vclos of variable * expr * env
            | Vrclos of variable * variable * expr * env
+           | RRaise
 and  
-     env = (variable * value) list
-	 
-	 
-	 
-let empty_env : env = []
+     env = (variable * result) list
 
 
 let remove_tuple var list =
@@ -60,37 +57,26 @@ let update_env var v1 env : env = match env with
 			else List.append env [(var,v1)]
 
 		
-let rec lookup_environment var env : value = match env with
-	| [] -> raise Not_found
-	| (k,v)::tl ->
-		if (k = var)
-			then v
-			else lookup_environment var tl
-				
-				
-let rec isValue exp = 
-match exp with
-	  Vnum _ -> true
-	| Vbool _ -> true
-	| Vnil _ -> true
-	| Vcons(e1,e2) -> isValue(e1) && isValue(e2)
-	| Vclos(_) -> true
-	| exp -> false
+let lookup_environment = List.assoc
 	
 	
-let rec eval (env:env) (exp : expr) : value =	match exp with
+let rec eval (env:env) (exp : expr) : result =	match exp with
 	(* Valores *)
-	Num(n) -> VNum(n)
-	| Bool(b) -> VBool(b)
+	Num(n) -> Vnum(n)
+	| Bool(b) -> Vbool(b)
 
 	(* Operações *)
 	
 	(* Operações binárias *)
-	(* O primeiro operando avalia para Raise *)
-	| Bop(op,e1,e2) when eval(env e1) == Raise -> Raise
-	(* O segundo operando avalia para Raise *)	
+	| Bop(op,e1,e2) ->
+      let v1 = eval env e1 in
+    	(* O primeiro operando avalia para Raise *)
+      if v1 == RRaise then RRaise else
+      let v2 = eval env e2 in
+	    (* O segundo operando avalia para Raise *)	
+      if v2 == RRaise then RRaise else
+    	(* Nenhum dos operandos avalia para raise *)
 	| Bop(op,e1,e2) when isValue(eval(env e1)) && eval(env e2) == Raise -> Raise
-	(* Nenhum dos operandos avalia para raise *)
 	| Bop(op,e1,e2) ->
 		let n1 = eval env e1 in
 		let n2 = eval env e2 in

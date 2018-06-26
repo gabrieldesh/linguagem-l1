@@ -30,11 +30,12 @@ type expr = Num of int
           | Raise
           | Try of expr * expr
 
-type value = Vnum of int 
+type result = Vnum of int 
            | Vbool of bool 
            | Vnil
-           | Vcons of value * value 
+           | Vcons of result * result 
            | Vclos of variable * expr * env
            | Vrclos of variable * variable * expr * env
+           | RRaise
 and  
-     env = (variable * value) list
+     env = (variable * result) list

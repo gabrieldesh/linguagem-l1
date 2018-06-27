@@ -132,32 +132,45 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
     | Nil -> Vnil
 
     (* Cons *)
-    | Cons(elemento, lista) when eval env elemento = RRaise -> RRaise
-    | Cons(elemento, lista) when eval env lista = RRaise -> RRaise
-    | Cons(elemento, lista) -> Vcons(eval env elemento, eval env lista)
+	| Cons(elemento,lista) ->
+		let n = eval env elemento in
+		if n == RRaise then RRaise
+		else
+			let n_lista = eval env lista in
+			if n_lista == RRaise then RRaise
+			else Vcons(n,n_lista)
 
     (* IsEmpty *)
-    | IsEmpty(e1) when eval env e1 = RRaise -> RRaise
-    | IsEmpty(e1) ->
-            if eval env e1 = Vnil
-            then Vbool(true)
-            else Vbool(false)
+	| IsEmpty(e1) ->
+		let n = eval env e1 in
+		if n == RRaise then RRaise
+		else if n = Vnil then Vbool(true) else Vbool(false)
 
 	(* Hd *)
-    | Hd(l) when eval env l = RRaise -> RRaise
-    | Hd(l) -> if eval env l = Vnil then RRaise
-                                     else (match l with Cons(e1, e2) -> eval env e1)
+	| Hd(l) ->
+		let v = eval env l in
+		if v == RRaise || v == Vnil then RRaise else
+			(match l with Cons(e1, e2) -> eval env e1
+						  | _ -> raise NoRuleApplies
+			)
+
 	(* Tl *)
-    | Tl(l) when eval env l = RRaise -> RRaise
-    | Tl(l) -> if eval env l = Vnil then RRaise
-                                     else (match l with Cons(e1, e2) -> eval env e2)
+	| Tl(l) ->
+	let v = eval env l in
+	if v == RRaise || v == Vnil then RRaise else
+			(match l with Cons(e1, e2) -> eval env e2
+						  | _ -> raise NoRuleApplies
+			)
 
 	(* Try *)
-    | Try(expr1, expr2) -> if eval env expr1 = RRaise
-                            then if eval env expr2 = RRaise
-                                  then RRaise
-                                  else eval env expr2
-                            else eval env expr1
+	| Try(e1,e2) ->
+	let v1 = eval env e1 in
+	if v1 == RRaise then
+		let v2 = eval env e2 in
+		if v2 == RRaise then RRaise
+		else v2
+	else v1
+	
 	(* Raise *)
     | Raise -> RRaise
 

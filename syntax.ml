@@ -3,7 +3,8 @@ type variable = string
 (* Outros operadores binário e unários podem ser adicionados a linguagem *) 
 
 
-type operator = Sum | Diff | Mult | Div | Eq | And | Or 
+type operator = Sum | Diff | Mult | Div | Eq | And | Or | NotEqual | Less 
+              | Greater | LessOrEqual | GreaterOrEqual
 
 type tipo  = TyVar of variable | TyInt | TyBool | TyFn of tipo * tipo 
            | TyList of tipo

@@ -11,6 +11,7 @@
 #mod_use "substituition.ml";;
 #mod_use "unify.ml";;
 #mod_use "typeInfer.ml";;
+#mod_use "evaluator.ml";;
 
 open Syntax;;
 open TypeConstraints;;
@@ -19,3 +20,4 @@ open Examples;;
 open Substituition;;
 open Unify;;
 open TypeInfer;;
+open Evaluator;;

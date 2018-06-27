@@ -31,8 +31,9 @@ let collectTyEqs env expr =
         let (t2, c2) = collect env e2 in
         (TyInt, c1 @ c2 @ [(t1, TyInt); (t2, TyInt)])
     
-    (* C-Eq *)
-    | Bop (Eq, e1, e2) ->
+    (* C-<Op>, onde <Op> é uma operação Int x Int -> Bool *)
+    | Bop ((Eq | NotEqual | Less | Greater | LessOrEqual | GreaterOrEqual), 
+           e1, e2) ->
         let (t1, c1) = collect env e1 in
         let (t2, c2) = collect env e2 in
         (TyBool, c1 @ c2 @ [(t1, TyInt); (t2, TyInt)])

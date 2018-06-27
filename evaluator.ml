@@ -152,6 +152,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	(* Nil *)
     | Vnil
 
+
     (* Cons *)
     | Cons(e1,e2) when eval(env e1) == RRaise -> RRaise
     | Cons(e1,e2) when isValue(eval(env e1)) && (eval(env e2) == Raise) -> Raise

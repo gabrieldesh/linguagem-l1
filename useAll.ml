@@ -10,6 +10,7 @@
 #mod_use "examples.ml";;
 #mod_use "substituition.ml";;
 #mod_use "unify.ml";;
+#mod_use "typeInfer.ml";;
 
 open Syntax;;
 open TypeConstraints;;
@@ -17,3 +18,4 @@ open CollectTyEqs;;
 open Examples;;
 open Substituition;;
 open Unify;;
+open TypeInfer;;

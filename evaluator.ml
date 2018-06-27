@@ -149,7 +149,6 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	(* LRec *)
 
     (* Nil *)
-    | Vnil
 
     (* Cons *)
     | Cons(e1,e2) when eval(env e1) == Raise -> Raise

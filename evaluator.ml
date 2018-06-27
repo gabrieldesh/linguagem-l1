@@ -143,12 +143,38 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 		)
 	
 	
-	(* Função - Lam *)
+	(* Função - Lam // Lam Implícito *)
+	| LamImpl(variable,exp) -> Vclos(variable,exp,env)
+	| Lam(variable,tipo,exp) -> Vclos(variable,exp,env)
 	
-	(* Let *)
-	
+	(* Let // Let Implícito *)
+	| Let(var,tipo,e1,e2) ->
+	let v1 = eval env e1 in
+	if v1 == RRaise then RRaise else
+		eval (update_env var v1 env) e2
+
+	| LetImpl(var,e1,e2) ->
+	let v1 = eval env e1 in
+	if v1 == RRaise then RRaise else
+		eval (update_env var v1 env) e2
+
 	(* LRec *)
-	
+(*| Lrec of variable * tipo * tipo * variable * tipo * expr * expr
+**| LrecImpl of variable * variable * expr * expr 
+*)
+	| Lrec(varF,t1,t2,varIN,tIN,e1,e2) -> 
+		let v1 = eval env e1 in
+		if v1 == RRaise then RRaise else
+			(match v1 with
+				Vclos(varIN,e,env') -> eval (update_env varF (Vrclos(varF,varIN,e,env)) env') e2
+			)
+	| LrecImpl(varF,varIN,e1,e2) -> 
+		let v1 = eval env e1 in
+		if v1 == RRaise then RRaise else
+			(match v1 with
+				Vclos(varIN,e,env') -> eval (update_env varF (Vrclos(varF,varIN,e,env)) env') e2
+			)
+(*
 	(* Nil *)
     | Vnil
 
@@ -164,7 +190,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
             if(eval(env e1) == Vnil)
             then Vbool(true)
             else Vbool(false)
-
+*)
 	(* Hd *)
 	(* Tl *)
 	(* Try *)

@@ -69,7 +69,6 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	
 	(* Operações binárias *)
 	| Bop(op,e1,e2) ->
-<<<<<<< HEAD
       let n1 = eval env e1 in
     	(* O primeiro operando avalia para Raise *)
       if n1 == RRaise then RRaise else
@@ -77,21 +76,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	    (* O segundo operando avalia para Raise *)	
       if n2 == RRaise then RRaise else
     	(* Nenhum dos operandos avalia para raise *)
-	(*| Bop(op,e1,e2) when isValue(eval(env e1)) && eval(env e2) == Raise -> Raise
-=======
-      let v1 = eval env e1 in
-    	(* O primeiro operando avalia para Raise *)
-      if v1 == RRaise then RRaise else
-      let v2 = eval env e2 in
-	    (* O segundo operando avalia para Raise *)	
-      if v2 == RRaise then RRaise else
-    	(* Nenhum dos operandos avalia para raise *)
-	| Bop(op,e1,e2) when isValue(eval(env e1)) && eval(env e2) == Raise -> Raise
->>>>>>> 85b5f2776bc65801370fb72f641a84cf4570e88e
-	| Bop(op,e1,e2) ->
-		let n1 = eval env e1 in
-		let n2 = eval env e2 in
-	*)
+
 		(match op,n1,n2 with
 			  Sum,Vnum(n1),Vnum(n2) -> Vnum(n1 + n2)
 			| Diff,Vnum(n1),Vnum(n2) -> Vnum(n1 - n2)
@@ -135,23 +120,28 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	(* Variável *)
 	| Var(variable) -> lookup_environment variable env
 	
+	
 	(* Aplicação *)
-	| App(e1,e2) when eval(env e1) == Raise -> Raise
-	| App(e1,e2) when isValue(eval(env e1)) && (eval(env e2) == Raise) -> Raise
-	| App(e1,e2) -> 
+	| App(e1,e2) ->	
 		let v1 = eval env e1 in
+		if v1 == RRaise then RRaise else
 		let v2 = eval env e2 in
+		if v2 == RRaise then RRaise else
+		
 		(match v1,v2 with
 			Vclos(var,e,env), v -> 
-				if(eval(update_env var v env) e == Raise) 
-					then Raise 
-					else eval(update_env var v env) e
+				let n = eval (update_env var v env) e in
+				if(n == RRaise) 
+					then RRaise 
+					else n
 				
-			| Vrclos(f,x,e,enf), v -> 
-				if(eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e == Raise)
-					then Raise
-					else eval(update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e
+			| Vrclos(f,x,e,env), v -> 
+				let n_rec = eval (update_env f (Vrclos(f,x,e,env)) (update_env x v env)) e in
+				if(n_rec == RRaise)
+					then RRaise
+					else n_rec
 		)
+	
 	
 	(* Função - Lam *)
 	
@@ -160,8 +150,20 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	(* LRec *)
 	
 	(* Nil *)
-	(* Cons *)
-	(* IsEmpty *)
+    | Vnil
+
+    (* Cons *)
+    | Cons(e1,e2) when eval(env e1) == RRaise -> RRaise
+    | Cons(e1,e2) when isValue(eval(env e1)) && (eval(env e2) == Raise) -> Raise
+    | Cons(e1,e2) -> eval(e1)::eval(e2)
+
+    (* IsEmpty *)
+    | IsEmpty(e1) when eval(env e1) == RRaise -> RRaise
+    | IsEmpty(e1) ->
+            if(eval(env e1) == Vnil)
+            then Vbool(true)
+            else Vbool(false)
+
 	(* Hd *)
 	(* Tl *)
 	(* Try *)

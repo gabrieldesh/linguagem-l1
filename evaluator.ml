@@ -134,22 +134,22 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
     (* Cons *)
 	| Cons(elemento,lista) ->
 		let n = eval env elemento in
-		if n == RRaise then RRaise
+		if n = RRaise then RRaise
 		else
 			let n_lista = eval env lista in
-			if n_lista == RRaise then RRaise
+			if n_lista = RRaise then RRaise
 			else Vcons(n,n_lista)
 
     (* IsEmpty *)
 	| IsEmpty(e1) ->
 		let n = eval env e1 in
-		if n == RRaise then RRaise
+		if n = RRaise then RRaise
 		else if n = Vnil then Vbool(true) else Vbool(false)
 
 	(* Hd *)
 	| Hd(l) ->
 		let v = eval env l in
-		if v == RRaise || v == Vnil then RRaise else
+		if v = RRaise || v = Vnil then RRaise else
 			(match l with Cons(e1, e2) -> eval env e1
 						  | _ -> raise NoRuleApplies
 			)
@@ -157,7 +157,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	(* Tl *)
 	| Tl(l) ->
 	let v = eval env l in
-	if v == RRaise || v == Vnil then RRaise else
+	if v = RRaise || v = Vnil then RRaise else
 			(match l with Cons(e1, e2) -> eval env e2
 						  | _ -> raise NoRuleApplies
 			)
@@ -165,9 +165,9 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	(* Try *)
 	| Try(e1,e2) ->
 	let v1 = eval env e1 in
-	if v1 == RRaise then
+	if v1 = RRaise then
 		let v2 = eval env e2 in
-		if v2 == RRaise then RRaise
+		if v2 = RRaise then RRaise
 		else v2
 	else v1
 	

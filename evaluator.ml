@@ -76,7 +76,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 				if v2 = RRaise then RRaise else v2
 
 	(* Variável *)
-	| Var(variable) -> 
+	| Var(variable) ->
       (try lookup_environment variable env
        with Not_found -> raise (UndefinedIdentifier variable))
 
@@ -123,7 +123,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	| Lrec(varF,t1,t2,varX,tX,e1,e2) ->
 		let v = eval (update_env varF (Vrclos (varF, varX, e1, env)) env) e2 in
 		if v = RRaise then RRaise else v
-    
+
 	| LrecImpl(varF,varX,e1,e2) ->
 		let v = eval (update_env varF (Vrclos (varF, varX, e1, env)) env) e2 in
 		if v = RRaise then RRaise else v
@@ -150,7 +150,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	| Hd(l) ->
 		let v = eval env l in
 		if v = RRaise || v = Vnil then RRaise else
-			(match l with Cons(e1, e2) -> eval env e1
+			(match v with Vcons(e1, e2) -> e1
 						  | _ -> raise NoRuleApplies
 			)
 
@@ -158,7 +158,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	| Tl(l) ->
 	let v = eval env l in
 	if v = RRaise || v = Vnil then RRaise else
-			(match l with Cons(e1, e2) -> eval env e2
+			(match v with Vcons(e1, e2) -> e2
 						  | _ -> raise NoRuleApplies
 			)
 
@@ -170,26 +170,26 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 		if v2 = RRaise then RRaise
 		else v2
 	else v1
-	
+
 	(* Raise *)
     | Raise -> RRaise
 
 	let environment = empty_env;;
-	
+
 	(* Test *)
 	let numAccept = Vnum(7);;
 	let boolAccept = Vbool(true);;
-	
+
 	(* testando update_env *)
 	let env = update_env "numAccept" numAccept environment;;
 	lookup_environment "numAccept" env;;
-	
+
 	(* operadores *)
 	let sumAccept = Bop(Sum,Num(1),Num(1))
 	let sumRaise = Bop(Sum,Raise,Num(2))
-	
+
 	let divAccept = Bop(Div,Num(4),Num(2))
 	let divRaise = Bop(Div,Num(2),Raise)
 	let divRaise0 = Bop(Div,Num(3),Num(0))
 	(* casos como Bop(Sum,Num(1),Bool(true)) serão impedidos pelo avaliador de tipos *)
-	
+

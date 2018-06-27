@@ -179,11 +179,11 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 
     (* Cons *)
     | Cons(elemento, lista) when eval env elemento == RRaise -> RRaise
-    | Cons(elemento, lista) when isValue(eval env elemento) && (eval env lista == RRaise) -> RRaise
-    | Cons(elemento, lista) -> eval(env,elemento)::eval(env,lista)
+    | Cons(elemento, lista) when eval env lista == RRaise -> RRaise
+    | Cons(elemento, lista) -> Vcons(eval env elemento, eval env lista)
 
     (* IsEmpty *)
-    | IsEmpty(e1) when eval(env e1) == RRaise -> RRaise
+    | IsEmpty(e1) when eval env e1 == RRaise -> RRaise
     | IsEmpty(e1) ->
             if eval env e1 == Vnil
             then Vbool(true)

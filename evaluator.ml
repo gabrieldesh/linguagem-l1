@@ -176,6 +176,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 			)
 
 	(* Nil *)
+    | Nil -> Vnil
 
     (* Cons *)
     | Cons(elemento, lista) when eval env elemento == RRaise -> RRaise

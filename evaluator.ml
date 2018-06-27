@@ -173,23 +173,3 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 
 	(* Raise *)
     | Raise -> RRaise
-
-	let environment = empty_env;;
-
-	(* Test *)
-	let numAccept = Vnum(7);;
-	let boolAccept = Vbool(true);;
-
-	(* testando update_env *)
-	let env = update_env "numAccept" numAccept environment;;
-	lookup_environment "numAccept" env;;
-
-	(* operadores *)
-	let sumAccept = Bop(Sum,Num(1),Num(1))
-	let sumRaise = Bop(Sum,Raise,Num(2))
-
-	let divAccept = Bop(Div,Num(4),Num(2))
-	let divRaise = Bop(Div,Num(2),Raise)
-	let divRaise0 = Bop(Div,Num(3),Num(0))
-	(* casos como Bop(Sum,Num(1),Bool(true)) serão impedidos pelo avaliador de tipos *)
-

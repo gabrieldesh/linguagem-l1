@@ -21,12 +21,15 @@ open Evaluator;;
 	
 	(* Testes - cada um corresponde à uma regra da semântica BIG-STEP *)
 	(* BS-NUM *)
-	let numAccept = Vnum(7);;
+	let numAccept = Num(7);;
+	let evalNumAccept = eval environment numAccept;;
+	
 	(* BS-BOOL *)
-	let boolAccept = Vbool(true);;
+	let boolAccept = Bool(true);;
+	let evalBoolAccept = eval environment boolAccept;;
 	
 	(* testando update_env *)
-	let env = update_env "numAccept" numAccept environment;;
+	let env = update_env "numAccept" (Vnum(7)) environment;;
 	lookup_environment "numAccept" env;;
 	
 	(* OPERADORES *)

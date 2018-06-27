@@ -31,7 +31,7 @@ let progFatImpl = App (fatImpl, Num 3)
 let rec map : (int -> int) -> int list -> int list = (fn f : (int -> int) =>
   (fn l : int list =>
     if not (isempty l)
-    then (f (hd l)) :: (tl l)
+    then (f (hd l)) :: (map f (tl l))
     else nil
   )
 ) in
@@ -43,7 +43,7 @@ let progMap =
         "f", TyFn (TyInt, TyInt),
         Lam ("l", TyList TyInt,
              If (Not (IsEmpty (Var "l")),
-                 Cons (App (Var "f", Hd (Var "l")), Tl (Var "l")),
+                 Cons (App (Var "f", Hd (Var "l")), App (App (Var "map", Var "f"), Tl (Var "l"))),
                  Nil)),
         Let ("inc", TyFn (TyInt, TyInt),
              Lam ("n", TyInt, Bop (Sum, Var "n", Num 1)),
@@ -54,7 +54,7 @@ let progMap =
    LrecImpl ("map", "f",
              LamImpl ("l",
                       If (Not (IsEmpty (Var "l")),
-                          Cons (App (Var "f", Hd (Var "l")), Tl (Var "l")),
+                          Cons (App (Var "f", Hd (Var "l")), App (App (Var "map", Var "f"), Tl (Var "l"))),
                           Nil)),
              LetImpl ("inc",
                       LamImpl ("n", Bop (Sum, Var "n", Num 1)),
@@ -95,7 +95,7 @@ let progUnificationError =
   LrecImpl ("map", "f",
             LamImpl ("l",
                      If (Not (IsEmpty (Var "l")),
-                         Cons (App (Var "f", Hd (Var "l")), Tl (Var "l")),
+                         Cons (App (Var "f", Hd (Var "l")), App (App (Var "map", Var "f"), Tl (Var "l"))),
                          Nil)),
             LetImpl ("inc",
                      LamImpl ("n", Bop (Sum, Var "n", Num 1)),
@@ -106,7 +106,7 @@ let progUndefinedIdentifier =
   LrecImpl ("map", "f",
             LamImpl ("l",
                      If (Not (IsEmpty (Var "l")),
-                         Cons (App (Var "f", Hd (Var "l")), Tl (Var "l")),
+                         Cons (App (Var "f", Hd (Var "l")), App (App (Var "map", Var "f"), Tl (Var "l"))),
                          Nil)),
             LetImpl ("inc",
                      LamImpl ("n", Bop (Sum, Var "n", Num 1)),

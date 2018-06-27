@@ -191,17 +191,19 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
             else Vbool(false)
 
 	(* Hd *)
+    | Hd(l) when eval env l == RRaise -> RRaise
+    | Hd(l) -> if eval env l == Vnil then RRaise
+                                     else (match l with Cons(e1, e2) -> eval env e1)
 	(* Tl *)
+    | Td(l) when eval env l == RRaise -> RRaise
+    | Td(l) -> if eval env l == Vnil then RRaise
+                                     else (match l with Cons(e1, e2) -> eval env e2)
+
 	(* Try *)
-	(* Raise - talvez lançar alguma exceção efetiva, algo do tipo
-	| Raise -> raise Exception
-	*)
-	(*
-		  | Nil
-          | Cons of expr * expr
-          | IsEmpty of expr
-          | Hd of expr
-          | Tl of expr
-          | Raise
-          | Try of expr * expr
-	*)
+    | Try(expr1, expr2) -> if eval env expr1 == RRaise
+                            then if eval env expr2 == RRaise
+                                  then RRaise
+                                  else eval env expr2
+                            else eval env expr1
+	(* Raise *)
+    | Raise -> RRaise

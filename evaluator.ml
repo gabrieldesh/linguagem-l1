@@ -195,8 +195,8 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
     | Hd(l) -> if eval env l == Vnil then RRaise
                                      else (match l with Cons(e1, e2) -> eval env e1)
 	(* Tl *)
-    | Td(l) when eval env l == RRaise -> RRaise
-    | Td(l) -> if eval env l == Vnil then RRaise
+    | Tl(l) when eval env l == RRaise -> RRaise
+    | Tl(l) -> if eval env l == Vnil then RRaise
                                      else (match l with Cons(e1, e2) -> eval env e2)
 
 	(* Try *)

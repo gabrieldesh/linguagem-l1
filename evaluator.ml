@@ -69,6 +69,7 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
 	
 	(* Operações binárias *)
 	| Bop(op,e1,e2) ->
+<<<<<<< HEAD
       let n1 = eval env e1 in
     	(* O primeiro operando avalia para Raise *)
       if n1 == RRaise then RRaise else
@@ -77,6 +78,16 @@ let rec eval (env:env) (exp : expr) : result =	match exp with
       if n2 == RRaise then RRaise else
     	(* Nenhum dos operandos avalia para raise *)
 	(*| Bop(op,e1,e2) when isValue(eval(env e1)) && eval(env e2) == Raise -> Raise
+=======
+      let v1 = eval env e1 in
+    	(* O primeiro operando avalia para Raise *)
+      if v1 == RRaise then RRaise else
+      let v2 = eval env e2 in
+	    (* O segundo operando avalia para Raise *)	
+      if v2 == RRaise then RRaise else
+    	(* Nenhum dos operandos avalia para raise *)
+	| Bop(op,e1,e2) when isValue(eval(env e1)) && eval(env e2) == Raise -> Raise
+>>>>>>> 85b5f2776bc65801370fb72f641a84cf4570e88e
 	| Bop(op,e1,e2) ->
 		let n1 = eval env e1 in
 		let n2 = eval env e2 in

@@ -34,18 +34,15 @@ type expr = Num of int
           | Raise
           | Try of expr * expr
 
-type value = Vnum of int 
+type result = Vnum of int 
            | Vbool of bool 
            | Vnil
-           | Vcons of value * value 
+           | Vcons of result * result 
            | Vclos of variable * expr * env
            | Vrclos of variable * variable * expr * env
+           | RRaise
 and  
-     env = (variable * value) list
-	 
-	 
-	 
-let empty_env : env = []
+     env = (variable * result) list
 
 
 let remove_tuple var list =
@@ -60,79 +57,72 @@ let update_env var v1 env : env = match env with
 			else List.append env [(var,v1)]
 
 		
-let rec lookup_environment var env : value = match env with
-	| [] -> raise Not_found
-	| (k,v)::tl ->
-		if (k = var)
-			then v
-			else lookup_environment var tl
-				
-				
-let rec isValue exp = 
-match exp with
-	  Vnum _ -> true
-	| Vbool _ -> true
-	| Vnil _ -> true
-	| Vcons(e1,e2) -> isValue(e1) && isValue(e2)
-	| Vclos(_) -> true
-	| exp -> false
+let lookup_environment = List.assoc
 	
 	
-let rec eval (env:env) (exp : expr) : value =	match exp with
+let rec eval (env:env) (exp : expr) : result =	match exp with
 	(* Valores *)
-	Num(n) -> VNum(n)
-	| Bool(b) -> VBool(b)
+	Num(n) -> Vnum(n)
+	| Bool(b) -> Vbool(b)
 
 	(* Operações *)
 	
 	(* Operações binárias *)
-	(* O primeiro operando avalia para Raise *)
-	| Bop(op,e1,e2) when eval(env e1) == Raise -> Raise
-	(* O segundo operando avalia para Raise *)	
-	| Bop(op,e1,e2) when isValue(eval(env e1)) && eval(env e2) == Raise -> Raise
-	(* Nenhum dos operandos avalia para raise *)
+	| Bop(op,e1,e2) ->
+      let n1 = eval env e1 in
+    	(* O primeiro operando avalia para Raise *)
+      if n1 == RRaise then RRaise else
+      let n2 = eval env e2 in
+	    (* O segundo operando avalia para Raise *)	
+      if n2 == RRaise then RRaise else
+    	(* Nenhum dos operandos avalia para raise *)
+	(*| Bop(op,e1,e2) when isValue(eval(env e1)) && eval(env e2) == Raise -> Raise
 	| Bop(op,e1,e2) ->
 		let n1 = eval env e1 in
 		let n2 = eval env e2 in
-		(match op with
-			  Sum -> n1 + n2
-			| Diff -> n1 - n2
-			| Mult -> n1 * n2
-			| Div ->(match n2 with
-					0 -> Raise
-					| _ -> n1 / n2
+	*)
+		(match op,n1,n2 with
+			  Sum,Vnum(n1),Vnum(n2) -> Vnum(n1 + n2)
+			| Diff,Vnum(n1),Vnum(n2) -> Vnum(n1 - n2)
+			| Mult,Vnum(n1),Vnum(n2) -> Vnum(n1 * n2)
+			| Div,Vnum(n1),Vnum(n2) ->(match n2 with
+					0 -> RRaise
+					| _ -> Vnum(n1 / n2)
 					)
-			| Eq -> n1 == n2
-			| And -> n1 && n2
-			| Or -> n1 || n2
-			| NotEqual -> n1 != n2
-			| Less -> n1 < n2
-			| Greater -> n1 > n2
-			| LessOrEqual -> n1 <= n2
-			| GreaterOrEqual -> n1 >= n2
+			| Eq,Vnum(n1),Vnum(n2) -> Vbool(n1 == n2)
+			| And,Vbool(n1),Vbool(n2) -> Vbool(n1 && n2)
+			| Or,Vbool(n1),Vbool(n2) -> Vbool(n1 || n2)
+			| NotEqual,Vnum(n1),Vnum(n2) -> Vbool(n1 != n2)
+			| Less,Vnum(n1),Vnum(n2) -> Vbool(n1 < n2)
+			| Greater,Vnum(n1),Vnum(n2) -> Vbool(n1 > n2)
+			| LessOrEqual,Vnum(n1),Vnum(n2) -> Vbool(n1 <= n2)
+			| GreaterOrEqual,Vnum(n1),Vnum(n2) -> Vbool(n1 >= n2)
 		)
 	(* Not *)
-	| Not(e1) ->(match eval(env e1) with
-				 Raise -> Raise
-				| _ -> !eval(e1)
-				)
+	| Not(e1) ->
+		let v1 = eval env e1 in
+		if v1 == RRaise then RRaise
+			else if v1 == Vbool(true) then Vbool(false)
+				else Vbool(true)
 				
 				
 	(* If *)
-	| If(e1,e2,e3) when eval(env e1) == Raise -> Raise
-	| If(e1,e2,e3) when eval(env e1) == true ->
-		(match eval(env e2) with
-			Raise -> Raise
-			| _ -> eval(env e2)
+	| If(e1,e2,e3) when eval env e1 == RRaise -> RRaise
+	| If(e1,e2,e3) when eval env e1 == Vbool(true) ->
+		let v2 = eval env e2 in
+		(match v2 with
+			RRaise -> RRaise
+			| _ -> v2
 		)
-	| If(e1,e2,e3) when eval(env e1) == false ->
-		(match eval(env e3) with
-			Raise -> Raise
-			| _ -> eval(env e3)
+	| If(e1,e2,e3) when eval env e1 == Vbool(false) ->
+		let v3 = eval env e3 in
+		(match v3 with
+			RRaise -> RRaise
+			| _ -> v3
 		)
 											 
 	(* Variável *)
-	| Var(variable) -> lookup_environment variable environment
+	| Var(variable) -> lookup_environment variable env
 	
 	(* Aplicação *)
 	| App(e1,e2) when eval(env e1) == Raise -> Raise

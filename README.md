@@ -1,8 +1,8 @@
 # Trabalho Final da disciplina de Semântica Formal
 Integrantes do grupo:
-Arthur Zachow
-Gabriel Haggstrom
-Gabriel Pakulski
+Arthur Zachow;
+Gabriel Haggstrom;
+Gabriel Pakulski.
 
 Implementação da Linguagem L1 feita na linguagem OCaml.
 
